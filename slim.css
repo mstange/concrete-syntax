@@ -90,12 +90,30 @@ pre > code.sourceCode {
 }
 
 /*********************************
+ * Box
+ *********************************/
+
+.reveal div.box {
+    /* Replace the drop shadow with a border. */
+    box-shadow: 0 0 0 3px var(--border-color);
+}
+
+/*********************************
  * Blockquotes
  *********************************/
 
 .reveal blockquote {
+    text-align: left;
     /* Replace the drop shadow with a border. */
-    box-shadow: 0 0 0 3px var(--border-color);
+    box-shadow: none;
+    border-left: 5px solid var(--border-color);
+    padding-left: 0.8em;
+    padding-block: 0;
+}
+
+/* Get rid of the top margin on paragraphs, to align the blockquote left border. */
+.reveal blockquote > p:first-child {
+    margin-top: 0;
 }
 
 /*********************************
