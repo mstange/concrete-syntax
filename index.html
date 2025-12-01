@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Slim Lim">
+  <title>Concrete syntax matters, actually</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@^5.2.0/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@^5.2.0/dist/reveal.css">
+  <style>
+    .reveal .sourceCode {  /* see #7635 */
+      overflow: visible;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        background-color: #2a211c;
+        color: #bdae9d;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #bdae9d;  padding-left: 4px; }
+    div.sourceCode
+      { color: #58595c; background-color: #fdfdfd; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #c54516; font-weight: bold; } /* Alert */
+    code span.an { color: #cc7e7e; font-style: italic; } /* Annotation */
+    code span.at { } /* Attribute */
+    code span.bn { color: #586dba; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #9d0909; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #586dba; } /* Char */
+    code span.cn { } /* Constant */
+    code span.co { color: #cc7e7e; font-style: italic; } /* Comment */
+    code span.do { color: #cc7e7e; font-style: italic; } /* Documentation */
+    code span.dt { color: #f20000; } /* DataType */
+    code span.dv { color: #586dba; } /* DecVal */
+    code span.er { color: #c54516; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #586dba; } /* Float */
+    code span.fu { color: #f20000; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #cc7e7e; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #9d0909; font-weight: bold; } /* Keyword */
+    code span.op { color: #a67f59; } /* Operator */
+    code span.ot { color: #cc7e7e; } /* Other */
+    code span.pp { font-weight: bold; } /* Preprocessor */
+    code span.sc { color: #586dba; } /* SpecialChar */
+    code span.ss { color: #586dba; } /* SpecialString */
+    code span.st { color: #586dba; } /* String */
+    code span.va { } /* Variable */
+    code span.vs { color: #586dba; } /* VerbatimString */
+    code span.wa { color: #c54516; font-weight: bold; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@^5.2.0/dist/theme/black.css" id="theme">
+  <link rel="stylesheet" href="slim.css"/>
+  <script defer=""
+  src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css" />
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+  <h1 class="title">Concrete syntax matters, actually</h1>
+  <p class="author"><a href="https://slim.computer/">Slim Lim</a></p>
+  <p class="institute"><div class="line-block">Notion<br />
+<a href="https://plait-lab.org/">PLAIT Lab</a>, UC Berkeley</div></p>
+  <p class="date">December 2025</p>
+</section>
+
+<section>
+<section id="wadlers-law" class="title-slide slide level1">
+<h1>Wadler’s Law?</h1>
+
+</section>
+<section id="wadlers-law-1996" class="slide level2">
+<h2>Wadler’s Law (1996)</h2>
+<blockquote>
+<p>In any language design, the total time spent discussing a feature in
+this list is proportional to two raised to the power of its
+position.</p>
+<ol start="0" type="1">
+<li>Semantics</li>
+<li>Syntax</li>
+<li>Lexical syntax</li>
+<li>Lexical syntax of comments</li>
+</ol>
+</blockquote>
+<!-- <https://wiki.haskell.org/Wadler's_Law> -->
+</section>
+<section id="wadlers-law-1996-1" class="slide level2">
+<h2>Wadler’s Law (1996)</h2>
+<blockquote>
+<p>In any language design, the total time spent discussing a feature in
+this list is proportional to two raised to the power of its
+position.</p>
+<ol start="0" type="1">
+<li>Semantics</li>
+<li>Syntax</li>
+<li><strong>Lexical syntax</strong></li>
+<li>Lexical syntax of comments</li>
+</ol>
+</blockquote>
+<div class="fragment">
+<div class="box"
+style="position: absolute; left: 60%; top: 50%; width: 300px;">
+<p>Also called: <strong>concrete syntax</strong>, surface syntax</p>
+</div>
+<aside class="notes">
+<p>audience for this talk is fairly interdisciplinary, so let’s be a bit
+more precise about what we mean by each of these things</p>
+</aside>
+</div>
+</section>
+<section id="whats-the-difference" class="slide level2">
+<h2>What’s the difference?</h2>
+<aside class="notes">
+<p>So the good news is that there’s actually a very straightforward,
+foolproof way to tell the distinction, which is that semantics are
+presented in Greek, and syntax is presented in Latin. ez done thank you
+for coming to my talk</p>
+</aside>
+<div class="fragment">
+<ul>
+<li><p><strong>Semantics</strong>: Greek</p>
+<p><span class="math display">
+  \frac{\delta, \delta&#39;; \pi_{m + 2}(\Theta); \sigma \vdash {e}_i
+\Downarrow \theta_i \qquad \bar{{e}} = {e}_1, \ldots, {e}_n}{\delta,
+\delta &#39;; \Theta; \sigma \vdash {e}(\bar{{e}}) \text{ FAIL}}
+  </span></p></li>
+<li><p><strong>Syntax</strong>: Latin</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode hs"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="dt">Expr</span> <span class="ot">=</span> <span class="dt">Let</span> <span class="dt">Name</span> <span class="dt">Expr</span> <span class="dt">Expr</span> </span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>          <span class="op">|</span> <span class="dt">Fun</span> <span class="dt">Name</span> <span class="dt">Expr</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>          <span class="op">|</span> <span class="dt">App</span> <span class="dt">Exp</span> <span class="dt">Expr</span></span></code></pre></div></li>
+</ul>
+</div>
+<div class="fragment">
+<p>Hope this helps!</p>
+</div>
+</section>
+<section id="ok-but-actually" class="slide level2">
+<h2>Ok but actually</h2>
+<p>Consider a simple program:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode hs huge"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> n <span class="ot">=</span> <span class="dv">3</span> <span class="kw">in</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">max</span> n <span class="dv">0</span></span></code></pre></div>
+<aside class="notes">
+<p>But really, to talk about the difference a bit more let’s start with
+reference to an example program, which you can imagine is in some
+unspecified purely functional FP.</p>
+</aside>
+</section>
+<section id="semantics-example" class="slide level2">
+<h2>Semantics: example</h2>
+<!-- ::: columns -->
+<!-- ::: column -->
+<!-- ```hs -->
+<!-- let n = 3 in … -->
+<!-- ``` -->
+<!-- ::: -->
+<!-- ::: column -->
+<p><span class="math display">
+\boxed{\texttt{let $x$ = 2 + 2 in $N$}}
+</span> <!-- ::: --> <!-- ::: --></p>
+<ul>
+<li><p><strong>Substitution</strong>: replace occurrences of <span
+class="math inline">x</span> with <span class="math inline">2 +
+2</span>, or <span class="math inline">4</span>?</p>
+<p><span class="math display">
+\texttt{let $x$ = $M$ in $N$} \;\longmapsto\; \underbrace{N[x :=
+M]}_\text{substitution}
+</span></p></li>
+<li><p><strong>Environment</strong>: partial function <span
+class="math inline">\sigma</span> maps name <span
+class="math inline">x</span> to <span class="math inline">2 + 2</span>,
+or <span class="math inline">4</span>?</p>
+<p><span class="math display">
+\langle \sigma, \, \texttt{let $x$ = $M$ in $N$} \rangle \;\longmapsto\;
+\langle \underbrace{\sigma[x := M]}_\text{extend env}, \, N \rangle
+</span></p></li>
+</ul>
+</section>
+<section id="semantics-finding-meaning" class="slide level2">
+<h2>Semantics: finding meaning</h2>
+<ul>
+<li>Many different genres:
+<ul>
+<li><strong>Denotational</strong> (Scott, Strachey)</li>
+<li><strong>Axiomatic</strong> (Hoare triples, pre- and
+post-conditions)</li>
+<li><strong>Operational</strong> (reduction rules, evaluation
+contexts)</li>
+<li>…</li>
+</ul></li>
+</ul>
+<aside class="notes">
+<ul>
+<li>Denotational: domain theory, compositional, mathematical object,
+[[]]</li>
+<li>Axiomatic: Hoare logic, pre and post conditions, rule of
+consequence</li>
+<li>Operational: contextual, big/small step, etc.</li>
+</ul>
+</aside>
+</section>
+<section id="semantics" class="slide level2">
+<h2>Semantics</h2>
+<ul>
+<li>They make the language what it is!</li>
+<li>But <strong>not the point</strong> of this talk</li>
+</ul>
+<!-- ## Concrete vs. abstract -->
+<!--  -->
+<!-- :::::: columns -->
+<!-- ::: {.column width="40%"} -->
+<!-- ```hs {data-id="code-1"} -->
+<!-- let … = … in -->
+<!--   … -->
+<!-- ``` -->
+<!-- ::: -->
+<!-- ::: {.column width="60%"} -->
+<!-- - Local **binding** -->
+<!--   - … -->
+<!--   - … -->
+<!--   - … -->
+<!-- ::: -->
+<!-- :::::: -->
+<!--  -->
+<!-- ## Concrete vs. abstract -->
+<!--  -->
+<!-- :::::: columns -->
+<!-- ::: {.column width="40%"} -->
+<!-- ```hs {data-id="code-1"} -->
+<!-- let n = … in -->
+<!--   … -->
+<!-- ``` -->
+<!-- ::: -->
+<!-- ::: {.column width="60%"} -->
+<!-- - Local **binding** -->
+<!--   - **Variable** `n`{.hs} -->
+<!--   - … -->
+<!--   - … -->
+<!-- ::: -->
+<!-- :::::: -->
+<!--  -->
+<!-- ## Concrete vs. abstract -->
+<!--  -->
+<!-- :::::: columns -->
+<!-- ::: {.column width="40%"} -->
+<!-- ```hs {data-id="code-1"} -->
+<!-- let n = 3 in -->
+<!--   … -->
+<!-- ``` -->
+<!-- ::: -->
+<!-- ::: {.column width="60%"} -->
+<!-- - Local **binding**  -->
+<!--   - **Variable** `n`{.hs} -->
+<!--   - Numeric **literal** `3`{.hs} -->
+<!--   - … -->
+<!-- ::: -->
+<!-- :::::: -->
+</section>
+<section id="syntax-concrete-vs.-abstract" class="slide level2">
+<h2>Syntax: concrete vs. abstract</h2>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode hs huge"><code class="sourceCode haskell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> n <span class="ot">=</span> <span class="dv">3</span> <span class="kw">in</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">max</span> n <span class="dv">0</span></span></code></pre></div>
+</section>
+<section id="syntax-concrete-vs.-abstract-1" class="slide level2">
+<h2>Syntax: concrete vs. abstract</h2>
+<div class="columns">
+<div class="column" style="width:40%;">
+<div class="sourceCode" id="cb4" data-id="code-1"><pre
+class="sourceCode hs"><code class="sourceCode haskell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> n <span class="ot">=</span> <span class="dv">3</span> <span class="kw">in</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">max</span> n <span class="dv">0</span></span></code></pre></div>
+</div><div class="column" style="width:60%;">
+<ul>
+<li>Local <strong>binding</strong>
+<ul>
+<li><strong>Variable</strong> <code
+class="sourceCode haskell">n</code></li>
+<li>Numeric <strong>literal</strong> <code
+class="sourceCode haskell"><span class="dv">3</span></code></li>
+<li>Function <strong>application</strong>
+<ul>
+<li><strong>Function</strong> <code
+class="sourceCode haskell"><span class="fu">max</span></code></li>
+<li><strong>Variable</strong> <code
+class="sourceCode haskell">n</code></li>
+<li>Numeric <strong>literal</strong> <code
+class="sourceCode haskell"><span class="dv">0</span></code></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="one-ast-many-concrete-possibilities" class="slide level2">
+<h2>One AST, many concrete possibilities</h2>
+<div class="columns">
+<div class="column" style="width:60%;">
+<ul>
+<li>Local <strong>binding</strong>
+<ul>
+<li><strong>Variable</strong> <code
+class="sourceCode haskell">n</code></li>
+<li>Numeric <strong>literal</strong> <code
+class="sourceCode haskell"><span class="dv">3</span></code></li>
+<li>Function <strong>application</strong>
+<ul>
+<li><strong>Function</strong> <code
+class="sourceCode haskell"><span class="fu">max</span></code></li>
+<li><strong>Variable</strong> <code
+class="sourceCode haskell">n</code></li>
+<li>Numeric <strong>literal</strong> <code
+class="sourceCode haskell"><span class="dv">0</span></code></li>
+</ul></li>
+</ul></li>
+</ul>
+</div><div class="column" style="width:40%;">
+<div class="sourceCode" id="cb5" data-id="code-1"><pre
+class="sourceCode hs"><code class="sourceCode haskell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> n <span class="ot">=</span> <span class="dv">3</span> <span class="kw">in</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">max</span> n <span class="dv">0</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">let</span> (<span class="op">[</span>n <span class="dv">3</span><span class="op">]</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">max</span> n <span class="dv">0</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> n <span class="op">=</span> <span class="dv">3</span><span class="op">;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(n<span class="op">,</span> <span class="dv">3</span>)</span></code></pre></div>
+</div>
+</div>
+</section>
+<section id="many-concrete-possibilities" class="slide level2">
+<h2>…<em>many</em> concrete possibilities</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode php"><code class="sourceCode php"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>my <span class="va">$n</span> <span class="op">=</span> <span class="dv">3</span><span class="ot">;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(<span class="va">$n</span><span class="ot">,</span> <span class="dv">3</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode mathematica"><code class="sourceCode mathematica"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">With</span><span class="op">[{</span><span class="fu">n</span> <span class="ex">=</span> <span class="dv">3</span><span class="op">},</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Max</span><span class="op">[</span><span class="fu">n</span><span class="op">,</span> <span class="dv">0</span><span class="op">]</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="op">]</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode py"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>n ← <span class="dv">3</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>n ⌈ <span class="dv">0</span></span></code></pre></div>
+</div><div class="column" style="width:50%;">
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode hs"><code class="sourceCode haskell"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span> n <span class="dv">0</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">where</span> n <span class="ot">=</span> <span class="dv">3</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">let</span> (<span class="op">[</span>n <span class="dv">3</span><span class="op">]</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">max</span> n <span class="dv">0</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode js"><code class="sourceCode javascript"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> n <span class="op">=</span> <span class="dv">3</span><span class="op">;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(n<span class="op">,</span> <span class="dv">3</span>)</span></code></pre></div>
+</div>
+</div>
+<p><small>See also <a
+href="https://dl.acm.org/doi/pdf/10.1145/365230.365257">The Next 700
+Programming Languages</a> (Landin 1966)</small></p>
+<aside class="notes">
+<p>Peter Landin</p>
+</aside>
+</section>
+<section id="concrete-syntax-examples" class="slide level2">
+<h2>Concrete syntax: examples</h2>
+<div class="columns">
+<div class="column">
+<ul>
+<li><strong>Keyword naming</strong>
+<ul>
+<li><code>const</code>, <code>let</code>, <code>var</code>,
+<code>my</code></li>
+</ul></li>
+<li><strong>Sigils/operators</strong>
+<ul>
+<li><code>x = v</code>, <code>x := v</code>, <code>x ← v</code></li>
+</ul></li>
+</ul>
+</div><div class="column">
+<ul>
+<li><strong>Block demarcation</strong>
+<ul>
+<li><code>{</code>…<code>}</code></li>
+<li><code>BEGIN</code>…<code>END</code></li>
+<li>Significant indentation</li>
+<li>Parens</li>
+</ul></li>
+</ul>
+</div>
+</div>
+<p>and more…</p>
+<aside class="notes">
+<ul>
+<li>Prefix/infix/postfix</li>
+<li>Paired delimiters</li>
+<li>Whitespace conventions</li>
+<li>and more…</li>
+</ul>
+</aside>
+</section>
+<section id="wadlers-law-again" class="slide level2">
+<h2>Wadler’s Law, again</h2>
+<aside class="notes">
+<p>however much time is spent discussing semantics, twice as much is
+spent on [abstract] syntax, twice as much on concrete, and so on</p>
+<p>intended as tongue-in-cheek</p>
+<p>allow me to boldly claim this implies an ordering</p>
+</aside>
+<blockquote>
+<p>In any language design, the total time spent discussing a feature in
+this list is proportional to two raised to the power of its
+position.</p>
+<ol start="0" type="1">
+<li>Semantics</li>
+<li>Syntax</li>
+<li>Lexical syntax</li>
+<li>Lexical syntax of comments</li>
+</ol>
+</blockquote>
+<div class="fragment">
+<div class="box">
+<p><em>Implication:</em> priority is <strong>backwards</strong></p>
+<p>i.e. concrete syntax <strong>exponentially less
+important</strong></p>
+</div>
+</div>
+</section>
+<section id="we-often-dismiss-concrete-syntax" class="slide level2">
+<h2>We often dismiss concrete syntax</h2>
+<ul>
+<li>Sometimes it’s explicit: <strong>“it’s <em>just</em>
+syntax”</strong>
+<ul>
+<li>Others absorb and uncritically repeat this view</li>
+</ul></li>
+<li>Even when we care, we might <strong>unconsciously devalue</strong>
+it
+<ul>
+<li>“Apologies for bikeshedding, but…”</li>
+</ul></li>
+</ul>
+</section>
+<section id="problems" class="slide level2">
+<h2>Problems</h2>
+<p>Too often, concrete syntax decisionmaking is:</p>
+<ol type="1">
+<li><strong>Idiosyncratic</strong></li>
+<li><strong>Under-documented</strong></li>
+<li><strong>Under-researched</strong></li>
+</ol>
+<p><em>And that is a shame!</em></p>
+</section>
+<section id="why-does-this-matter" class="slide level2">
+<h2>Why does this matter?</h2>
+<p>Concrete syntax is the <strong>foremost user interface</strong> for
+most programming languages.</p>
+<div class="fragment">
+<p>also software libraries, mathematical theories (notation), etc.</p>
+</div>
+</section></section>
+<section>
+<section id="programming-languages-have-user-interfaces"
+class="title-slide slide level1">
+<h1>Programming languages have user interfaces</h1>
+
+</section>
+<section id="not-a-new-idea" class="slide level2">
+<h2>Not a new idea</h2>
+<blockquote>
+<p>[m]illions for compilers, but <strong>hardly a penny for
+understanding human programming language use.</strong> Now, programming
+languages are obviously symmetrical, the computer on one side, the human
+on the other. In an <strong>appropriate science of computer
+languages</strong>, one would expect that half the effort would be on
+the computer side, understanding how to translate the languages into
+executable form, and half on the human side, understanding how to design
+languages that are <strong>easy or productive to use</strong>.</p>
+</blockquote>
+<p><small>John Pane (1985), via Newell and Card, via Felleisen, emphasis
+mine</small></p>
+</section>
+<section id="not-a-new-idea-1" class="slide level2">
+<h2>Not a new idea</h2>
+<ul>
+<li><a
+href="https://www.eecg.utoronto.ca/~jzhu/csc326/readings/iverson.pdf">Notation
+as a tool of thought</a> (Iverson 1979)</li>
+<li><a
+href="https://www.cl.cam.ac.uk/~afb21/CognitiveDimensions/papers/Green1989.pdf">Cognitive
+Dimensions of Notations</a> (Green 1989)</li>
+<li><a
+href="https://felleisen.org/matthias/Presentations/Mexico.ppt">Human
+Language Interface</a> (Felleisen 2003)</li>
+<li><a
+href="https://www.cl.cam.ac.uk/~afb21/CognitiveDimensions/papers/Green1989.pdf">Good
+Ideas, Through the Looking Glass</a> (Wirth 2006)</li>
+</ul>
+</section>
+<section id="but-little-research-on-syntax-itself" class="slide level2">
+<h2>But little research on syntax itself</h2>
+<ul>
+<li>Graphical user interfaces (GUIs)
+<ul>
+<li><strong>Visual languages</strong> (Alice, Scratch, Max/MSP, Quartz
+Composer)</li>
+<li><strong>GUI environments, IDE extensions</strong> for textual
+programming languages</li>
+</ul></li>
+<li>Error messages</li>
+</ul>
+<div class="fragment">
+<div class="box">
+<p>Both important, but <strong>metatextual</strong>!</p>
+</div>
+</div>
+</section>
+<section id="what-about-everything-else" class="slide level2">
+<h2>What about everything else?</h2>
+</section>
+<section id="expanding-our-concept-of-ui" class="slide level2">
+<h2>Expanding our concept of UI</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode php"><code class="sourceCode php"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>my <span class="va">$n</span> <span class="op">=</span> <span class="dv">3</span><span class="ot">;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(<span class="va">$n</span><span class="ot">,</span> <span class="dv">3</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode mathematica"><code class="sourceCode mathematica"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">With</span><span class="op">[{</span><span class="fu">n</span> <span class="ex">=</span> <span class="dv">3</span><span class="op">},</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Max</span><span class="op">[</span><span class="fu">n</span><span class="op">,</span> <span class="dv">0</span><span class="op">]</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="op">]</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode py"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>n ← <span class="dv">3</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>n ⌈ <span class="dv">0</span></span></code></pre></div>
+</div><div class="column" style="width:50%;">
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode hs"><code class="sourceCode haskell"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> n <span class="ot">=</span> <span class="dv">3</span> <span class="kw">in</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">max</span> n <span class="dv">0</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">let</span> (<span class="op">[</span>n <span class="dv">3</span><span class="op">]</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">max</span> n <span class="dv">0</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode js"><code class="sourceCode javascript"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> n <span class="op">=</span> <span class="dv">3</span><span class="op">;</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(n<span class="op">,</span> <span class="dv">3</span>)</span></code></pre></div>
+</div>
+</div>
+</section>
+<section id="expanding-our-concept-of-ui-1" class="slide level2">
+<h2>Expanding our concept of UI</h2>
+<ul>
+<li>Text is here to stay</li>
+<li>Choosing concrete syntax is unavoidable</li>
+<li><strong>Legitimize thinking about the program itself as
+UI</strong></li>
+</ul>
+<aside class="notes">
+<p>If your language supports humans authoring text files, you have to
+pick what characters they input</p>
+</aside>
+</section>
+<section id="expanding-our-concept-of-ui-2" class="slide level2">
+<h2>Expanding our concept of UI</h2>
+<blockquote>
+<p>By <strong>relieving the brain</strong> of all unnecessary work, a
+good notation sets it free to <strong>concentrate on more advanced
+problems</strong>, and in effect increases the mental power of the
+race.</p>
+</blockquote>
+<p><small>A. N. Whitehead, emphasis mine</small></p>
+</section>
+<section id="our-focus" class="slide level2">
+<h2>Our focus</h2>
+<ul>
+<li><strong>Textual</strong>, <strong>general-purpose</strong>
+programming languages</li>
+<li>For <strong>experienced users</strong> (not exclusively, but at
+least)</li>
+<li><strong>Focus on the language itself</strong>, not the programming
+environment
+<ul>
+<li>Basic affordances: syntax highlighting, LSP</li>
+</ul></li>
+</ul>
+</section>
+<section id="caveats" class="slide level2">
+<h2>Caveats</h2>
+<ul>
+<li>GUIs <strong>no less valid</strong>, just relatively
+better-studied!</li>
+<li><strong>Hard to decouple</strong>: system = notation + environment
+(Green)</li>
+</ul>
+<blockquote>
+<p>If we have function keys to generate syntactic constructions, for
+example, <strong>which is the ‘notation’</strong>—the <strong>keys we
+press</strong>, or the <strong>words we see</strong>? Various factors
+will determine the user’s view, such as <strong>prior
+experience</strong>; the <strong>units operated upon by the
+editor</strong> […] and whether a simple mapping can be perceived
+between […] a <strong>function key</strong> […] generating a simple
+<strong>indivisible unit</strong> of a few words.</p>
+</blockquote>
+<p><small>T.R.G. Green (1989), emphasis mine</small></p>
+</section></section>
+<section>
+<section id="syntax-mediates-semantics"
+class="title-slide slide level1">
+<h1>Syntax mediates semantics</h1>
+
+</section>
+<section id="potentially-counterintuitive" class="slide level2">
+<h2>Potentially counterintuitive</h2>
+<div class="columns">
+<div class="column">
+<h3 id="syntactic">Syntactic</h3>
+<p><span class="math display">
+\boxed{\vdash \varphi}
+</span></p>
+<p>“can be proved”</p>
+</div><div class="column" style="border-left: 2px solid black;">
+<h3 id="semantic">Semantic</h3>
+<p><span class="math display">
+\boxed{\models \varphi}
+</span></p>
+<p>“is modeled by”</p>
+</div>
+</div>
+</section>
+<section id="example-propositional-logic" class="slide level2">
+<h2>Example: Propositional logic</h2>
+<p>The following definition is <strong>purely syntactic</strong>:</p>
+<p><span class="math display">
+\begin{aligned}
+\varphi &amp;:= \ldots \\
+&amp;\mid \varphi_1 \land \varphi_2 \\
+&amp;\mid \varphi_1 \to \varphi_2  \\
+&amp;\mid \ldots
+\end{aligned}
+</span></p>
+<div class="fragment">
+<p>“Just symbols,” but if I went onto <strong>define implication using
+<span class="math inline">\land</span></strong>, you would probably hate
+me</p>
+</div>
+</section>
+<section id="what-does-this-operator-mean" class="slide level2">
+<h2>What does this operator mean?</h2>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode hs huge"><code class="sourceCode haskell"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">&gt;&gt;=</span> y</span></code></pre></div>
+</section>
+<section id="what-does-this-operator-mean-1" class="slide level2">
+<h2>What does this operator mean?</h2>
+<ul>
+<li><p><strong>Functional programmers</strong>: monadic bind</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode hs"><code class="sourceCode haskell"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>m <span class="op">&gt;&gt;=</span> f <span class="op">&gt;&gt;=</span> g <span class="op">&gt;&gt;=</span> h</span></code></pre></div></li>
+<li><p><strong>C-style programmers</strong>: bitwise right shift
+assignment</p>
+<p><span class="math display">\llbracket \texttt{x &gt;&gt;= 1}
+\rrbracket \approx \llbracket \texttt{x = x &gt;&gt; 1}
+\rrbracket</span></p>
+<p><super><span class="math inline">^\approx</span></super> <em>assuming
+<span class="math inline">\texttt{x}</span> is scalar variable, no side
+effects, etc.</em></p></li>
+<li><p><strong>JavaScript programmers</strong>: maybe no idea?</p></li>
+</ul>
+</section>
+<section id="human-factors-broach-the-divide" class="slide level2">
+<h2>Human factors broach the divide</h2>
+<p>Despite best intentions, we are <strong>pareidolic</strong>
+creatures</p>
+<ul>
+<li>Prior background (both depth and nature)</li>
+<li>Other syntactic choices</li>
+</ul>
+<aside class="notes">
+<p>we are determined to find Jesus’s face in our burnt toast, or
+implication in symbol soup</p>
+</aside>
+</section>
+<section id="question" class="slide level2">
+<h2>Question</h2>
+<p>If symbol perception is all relative, <strong>why design concrete
+syntax</strong>?</p>
+</section>
+<section id="syntax-mediates-semantics-1" class="slide level2">
+<h2>Syntax mediates semantics</h2>
+<blockquote>
+<p>It has become fashionable to regard notation as a secondary issue
+depending <strong>purely on personal taste</strong>. This could partly
+be true; yet the choice of notation <strong>should not be considered
+arbitrary</strong>. It has consequences and <strong>reveals the
+language’s character</strong>.</p>
+</blockquote>
+<p><small>Niklaus Wirth (2006), emphasis mine</small></p>
+</section>
+<section id="tales-from-the-other-side" class="slide level2">
+<h2>Tales from the other side</h2>
+<ol type="1">
+<li>Different kinds of sugar</li>
+<li>Symbols and whitespace</li>
+<li>Names matter</li>
+</ol>
+</section></section>
+<section>
+<section id="two-kinds-of-syntactic-sugar"
+class="title-slide slide level1">
+<h1>Two kinds of syntactic sugar</h1>
+
+</section>
+<section id="syntactic-sugar" class="slide level2">
+<h2>Syntactic sugar</h2>
+<ul>
+<li>Coined by Landin in 1964</li>
+<li>Formalized through <strong>macro extensibility</strong> by Felleisen
+(1991)</li>
+<li>Describes <strong>syntactic niceties</strong>
+(e.g. <code>let</code>-binding) built on top of a smaller <strong>core
+language</strong> (e.g. applicative expressions)</li>
+</ul>
+<div class="columns">
+<div class="column">
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode hs"><code class="sourceCode haskell"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> x <span class="ot">=</span> v <span class="kw">in</span> …</span></code></pre></div>
+</div><div class="column">
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode hs"><code class="sourceCode haskell"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>(\x <span class="ot">-&gt;</span> …) v</span></code></pre></div>
+</div>
+</div>
+<aside class="notes">
+<p>“The mechanical evaluation of expressions”</p>
+</aside>
+</section>
+<section id="example-1-definitions-in-scheme" class="slide level2">
+<h2>Example 1: Definitions in Scheme</h2>
+</section>
+<section id="top-level-define" class="slide level2">
+<h2>Top-level <code>define</code></h2>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> x </span><span class="dv">1</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> y </span>(<span class="op">+</span> <span class="dv">4</span> x))</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>❯ (<span class="op">+</span> x y)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="dv">6</span></span></code></pre></div>
+</section>
+<section id="functions-are-just-bound-lambdas" class="slide level2">
+<h2>Functions are just bound <code>lambda</code>s</h2>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> x </span><span class="dv">1</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> y </span>(<span class="op">+</span> <span class="dv">4</span> x))</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> f </span>(<span class="kw">lambda</span> (n) (<span class="op">*</span> n <span class="dv">2</span>)))</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>❯ (f (<span class="op">+</span> x y))</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="dv">12</span></span></code></pre></div>
+</section>
+<section id="sussman-form-shorthand" class="slide level2">
+<h2>Sussman form shorthand</h2>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> f </span>(<span class="kw">lambda</span> (n) …))</span></code></pre></div>
+<p>becomes</p>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(f n) …)</span></code></pre></div>
+<aside class="notes">
+<p>Racketeers sometimes call this - define with parameter list - define
+binding a lambda</p>
+</aside>
+</section>
+<section id="sussman-form-shorthand-1" class="slide level2">
+<h2>Sussman form shorthand</h2>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> f </span>(<span class="kw">lambda</span> (n) (<span class="op">*</span> n <span class="dv">2</span>)))</span></code></pre></div>
+<p>becomes</p>
+<div class="sourceCode" id="cb29"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(f n) (<span class="op">*</span> n <span class="dv">2</span>))</span></code></pre></div>
+</section>
+<section id="sussman-form-shorthand-2" class="slide level2">
+<h2>Sussman form shorthand</h2>
+<div class="sourceCode" id="cb30"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> fact</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">lambda</span> (n)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">if</span> (<span class="kw">zero?</span> n) <span class="dv">1</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>        (<span class="op">*</span> n (fact (<span class="op">-</span> n <span class="dv">1</span>))))))</span></code></pre></div>
+<p>becomes</p>
+<div class="sourceCode" id="cb31"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(fact n)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">if</span> (<span class="kw">zero?</span> n) <span class="dv">1</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>      (<span class="op">*</span> n (fact (<span class="op">-</span> n <span class="dv">1</span>)))))</span></code></pre></div>
+</section>
+<section id="sussman-form" class="slide level2">
+<h2>Sussman form</h2>
+<ul>
+<li><strong>Terser</strong>, less nesting</li>
+<li><strong>Visually distinguishes</strong> top-level function
+bindings</li>
+<li>But <strong>hides the simplicity</strong> of first-class functions
+<ul>
+<li>Easier to understand recursion without the sugar</li>
+</ul></li>
+</ul>
+</section>
+<section id="example-javascript-inheritance" class="slide level2">
+<h2>Example: JavaScript inheritance</h2>
+</section>
+<section id="example-javascript-inheritance-1" class="slide level2">
+<h2>Example: JavaScript inheritance</h2>
+<ul>
+<li><p>Pre-2015: <strong>prototypal inheritance</strong></p>
+<div class="sourceCode" id="cb32"><pre
+class="sourceCode js compact"><code class="sourceCode javascript"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">Parent</span>() {}</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">Child</span>() { Parent<span class="op">.</span><span class="fu">call</span>(<span class="kw">this</span>) }</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>Child<span class="op">.</span><span class="at">prototype</span> <span class="op">=</span> <span class="bu">Object</span><span class="op">.</span><span class="fu">create</span>(Parent<span class="op">.</span><span class="at">prototype</span>)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>Child<span class="op">.</span><span class="at">prototype</span><span class="op">.</span><span class="at">constructor</span> <span class="op">=</span> Child</span></code></pre></div></li>
+<li><p>Post-2015: <strong>class-based inheritance</strong></p>
+<div class="sourceCode" id="cb33"><pre
+class="sourceCode js"><code class="sourceCode javascript"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Parent {}</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Child <span class="kw">extends</span> Parent {</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">constructor</span>() { <span class="kw">super</span>() }</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div></li>
+</ul>
+</section>
+<section id="es2015-class-syntax" class="slide level2">
+<h2>ES2015 <code>class</code> syntax</h2>
+<ul>
+<li>Mostly engine-level syntactic sugar over prototypes</li>
+<li><strong>Intentionally obscures</strong> prototypal semantics,
+<strong>redirecting mental model</strong> to classes
+<ul>
+<li>Don’t need to understand prototypes to use <code>class</code>—you’re
+often better off without!</li>
+</ul></li>
+</ul>
+</section>
+<section id="a-tale-of-two-sugars" class="slide level2">
+<h2>A tale of two sugars</h2>
+<div class="columns">
+<div class="column">
+<p><strong>“Mystifies” functions</strong> for visual efficiency</p>
+<div class="sourceCode" id="cb34"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(fact n)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">if</span> (<span class="kw">zero?</span> n) <span class="dv">1</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>      (<span class="op">*</span> n </span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>         (fact (<span class="op">-</span> n <span class="dv">1</span>)))))</span></code></pre></div>
+</div><div class="column">
+<p><strong>Redirects mental model</strong> to classes</p>
+<div class="sourceCode" id="cb35"><pre
+class="sourceCode js"><code class="sourceCode javascript"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Parent {}</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Child <span class="kw">extends</span> Parent {</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">constructor</span>() { <span class="kw">super</span>() }</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+</div>
+</section>
+<section id="a-tale-of-two-sugars-1" class="slide level2">
+<h2>A tale of two sugars</h2>
+<p>Both <strong>obscure the core language</strong> (syntactic
+abstraction).</p>
+<ul>
+<li>Can permit <strong>intentional redirection</strong> of programmer
+mental model</li>
+<li>Or introduce <strong>incidental opacity</strong> or makes the
+language seem more complicated than it is
+<ul>
+<li>But could <strong>still be worthwhile</strong> on balance
+(e.g. terseness, visual distinction)</li>
+</ul></li>
+</ul>
+<div class="fragment">
+<div class="box">
+<p>Worth considering when defining your own</p>
+</div>
+</div>
+</section></section>
+<section>
+<section id="names-matter" class="title-slide slide level1">
+<h1>Names matter</h1>
+
+</section>
+<section id="typescript" class="slide level2">
+<h2>TypeScript</h2>
+<ul>
+<li><p><strong>Subtyping</strong>: types form a lattice over <span
+class="math inline">&lt;:</span> relation</p>
+<ul>
+<li><span class="math inline">\top</span> is the <strong>universal
+supertype</strong></li>
+</ul>
+<p><span class="math display">
+  \boxed{
+  \bot \;&lt;:\; \texttt{&quot;hello&quot;} \;&lt;:\;
+\textsf{string}  \;&lt;:\; \top
+  }
+  </span></p></li>
+<li><p><strong>Gradual typing</strong>: typed-untyped codebase
+interaction</p>
+<ul>
+<li><span class="math inline">\textsf{Dyn}</span> is the <strong>dynamic
+type</strong>, an “escape hatch”</li>
+</ul>
+<p><span class="math display">
+  \boxed{
+  \bot \;&lt;:&gt;\; \textsf{Dyn} \;&lt;:&gt;\; \top
+  }
+  </span></p></li>
+</ul>
+</section>
+<section id="question-1" class="slide level2">
+<h2>Question</h2>
+<p>How to express <strong>any possible type</strong>?</p>
+<p><span class="math display">
+\textrm{isString} : \mathrm{???} \to \textsf{boolean}
+</span></p>
+</section>
+<section id="question-2" class="slide level2">
+<h2>Question</h2>
+<p>How to express <strong>any possible type</strong>?</p>
+<p><span class="math display">
+\textrm{isString} : \red{\mathbf{\top}} \to \textsf{boolean}
+</span></p>
+</section>
+<section id="writing-the-program" class="slide level2">
+<h2>Writing the program</h2>
+<p>How to express <strong>any possible type</strong>?</p>
+<div class="sourceCode" id="cb36"><pre
+class="sourceCode ts"><code class="sourceCode typescript"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">isString</span>(x<span class="op">:</span> <span class="co">/* ?? */</span>)<span class="op">:</span> <span class="dt">boolean</span></span></code></pre></div>
+</section>
+<section id="writing-the-program-1" class="slide level2">
+<h2>Writing the program</h2>
+<p>How to express <strong>any possible type</strong>?</p>
+<div class="sourceCode" id="cb37"><pre
+class="sourceCode ts"><code class="sourceCode typescript"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">isString</span>(x<span class="op">:</span> <span class="dt">any</span>)<span class="op">:</span> <span class="dt">boolean</span></span></code></pre></div>
+<div class="fragment">
+<div class="box"
+style="color: red; position: absolute; left: 50%; transform: translateX(-50%); top: 100%;">
+<p>Problem: <code>any</code> is <span
+class="math inline">\mathsf{Dyn}</span>, not <span
+class="math inline">\top</span>!</p>
+</div>
+</div>
+</section>
+<section id="mathsfdyn-vs.-top" class="slide level2">
+<h2><span class="math inline">\mathsf{Dyn}</span> vs. <span
+class="math inline">\top</span></h2>
+<p><span class="math display">
+\boxed{
+\bot \;&lt;:&gt;\; \textsf{Dyn} \;&lt;:&gt;\; \top
+}
+</span></p>
+<p><strong><span class="math inline">\mathsf{Dyn}</span> is
+unsound</strong>: breaks typing guarantees, causes major incidents</p>
+</section>
+<section id="so-how-do-we-write-top-actually" class="slide level2">
+<h2>So how do we write <span class="math inline">\top</span>
+actually?</h2>
+<div class="sourceCode" id="cb38"><pre
+class="sourceCode ts"><code class="sourceCode typescript"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">isString</span>(x<span class="op">:</span> <span class="dt">unknown</span>)<span class="op">:</span> <span class="dt">boolean</span></span></code></pre></div>
+</section>
+<section id="vernacular-misconceptions" class="slide level2">
+<h2>Vernacular misconceptions</h2>
+<blockquote>
+<p><strong>any</strong> (adj.)</p>
+<ol type="1">
+<li>one or some indiscriminately of whatever kind […]</li>
+<li>unmeasured or unlimited in amount, number, or extent</li>
+</ol>
+</blockquote>
+<p><small>source: <a
+href="https://www.merriam-webster.com/dictionary/any">Merriam-Webster</a></small></p>
+</section>
+<section id="but-wait-it-gets-worse" class="slide level2">
+<h2>But wait, it gets worse</h2>
+</section>
+<section class="slide level2">
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Dynamic</th>
+<th>Top</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TypeScript</strong> (JS), <strong>Luau</strong> (Lua)</td>
+<td><code>any</code></td>
+<td><code>unknown</code></td>
+</tr>
+<tr>
+<td><strong>Flow</strong> (JS)</td>
+<td><code>any</code></td>
+<td><code>mixed</code></td>
+</tr>
+<tr>
+<td><strong>mypy, Pyre</strong> (Python)</td>
+<td><code>Any</code></td>
+<td><code>object</code></td>
+</tr>
+<tr>
+<td><strong>Sorbet</strong> (Ruby)</td>
+<td><code>untyped</code></td>
+<td><code>anything</code><a href="#/fn1" class="footnote-ref"
+id="fnref1" role="doc-noteref"><sup>1</sup></a></td>
+</tr>
+<tr>
+<td><strong>Hack</strong> (PHP)</td>
+<td><code>dynamic</code></td>
+<td><code>mixed</code></td>
+</tr>
+<tr>
+<td><strong>Elixir</strong> (Erlang)</td>
+<td><code>dynamic</code></td>
+<td><code>any</code><a href="#/fn2" class="footnote-ref" id="fnref2"
+role="doc-noteref"><sup>2</sup></a></td>
+</tr>
+<tr>
+<td><strong>Typed Racket</strong> (Racket)</td>
+<td>-<a href="#/fn3" class="footnote-ref" id="fnref3"
+role="doc-noteref"><sup>3</sup></a></td>
+<td><code>Any</code></td>
+</tr>
+<tr>
+<td><strong>Scala, Kotlin</strong></td>
+<td>-</td>
+<td><code>any</code></td>
+</tr>
+<tr>
+<td><strong>Swift</strong></td>
+<td>-</td>
+<td><code>Any</code><a href="#/fn4" class="footnote-ref" id="fnref4"
+role="doc-noteref"><sup>4</sup></a></td>
+</tr>
+</tbody>
+</table>
+<!-- | **Dart** | `dynamic` | `Object` | -->
+</section>
+<section id="developers-developers-developers" class="slide level2">
+<h2>Developers, developers, developers!</h2>
+<ul>
+<li><strong>Half the languages</strong> use <code>any</code> for <span
+class="math inline">\mathsf{Dyn}</span>, and the <strong>other
+half</strong> for <span class="math inline">\top</span>
+<ul>
+<li>First group includes JavaScript and Python-based</li>
+<li>Second group includes Scala, Kotlin, Swift</li>
+</ul></li>
+<li>Languages that don’t use <code>any</code> all have <strong>different
+names for <span class="math inline">\top</span></strong>
+<ul>
+<li><code>unknown</code>, <code>mixed</code>, <code>object</code>,
+<code>anything</code></li>
+</ul></li>
+</ul>
+</section>
+<section id="researchers-researchers-researchers" class="slide level2">
+<h2>Researchers, researchers, researchers!</h2>
+<ul>
+<li><strong>Modern, research-based PLs</strong> like Luau (Roblox) are
+adopting the same names
+<ul>
+<li>Luau follows TypeScript’s naming exactly, despite ~no linguistic
+heritage</li>
+</ul></li>
+<li><strong>Names change during implementation</strong>: Elixir’s paper
+uses <code>term</code> for <span class="math inline">\top</span>, but
+the documentation uses <code>any</code>
+<ul>
+<li>Trivial-seeming changes can affect careful work</li>
+</ul></li>
+</ul>
+<p><small>Of note: Stefik &amp; Siebert (2013), <a
+href="https://www.vidarholen.net/~vidar/An_Empirical_Investigation_into_Programming_Language_Syntax.pdf">An
+Empirical Investigation into Programming Language Syntax</a></small></p>
+</section></section>
+<section>
+<section id="punctuation-whitespace-matter"
+class="title-slide slide level1">
+<h1>Punctuation &amp; whitespace matter</h1>
+<p>Or, how I became an <span class="math inline">\eta</span>-expansion
+scrooge</p>
+</section>
+<section id="background" class="slide level2">
+<h2>Background</h2>
+<ul>
+<li>It’s the early 2010s, and everyone is talking about
+<strong>Node.js</strong>, the new server-side JavaScript runtime</li>
+<li>JavaScript uses the <strong>reactor pattern</strong> to perform
+<strong>non-blocking I/O</strong></li>
+</ul>
+</section>
+<section id="async-in-javascript-abridged-history" class="slide level2">
+<h2>Async in JavaScript: abridged history</h2>
+<ol type="1">
+<li><strong>Continuation-passing style</strong> (“callback hell”)</li>
+<li><strong><code>Promise</code></strong> chaining</li>
+<li><strong><code>async</code>/<code>await</code></strong> (today’s
+world)</li>
+</ol>
+</section>
+<section id="continuation-passing-style" class="slide level2">
+<h2>Continuation-passing style</h2>
+<div class="sourceCode" id="cb39"><pre
+class="sourceCode js"><code class="sourceCode javascript"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runA</span>(<span class="kw">function</span> (a) {</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">runB</span>(a<span class="op">,</span> <span class="kw">function</span> (b) {</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">runC</span>(b<span class="op">,</span> <span class="kw">function</span> (c) {</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>      …</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+</section>
+<section id="promise-chaining" class="slide level2">
+<h2><code>Promise</code> chaining</h2>
+<div class="sourceCode" id="cb40"><pre
+class="sourceCode js"><code class="sourceCode javascript"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runA</span>()</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(runB)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(runC)</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(…)</span></code></pre></div>
+</section>
+<section id="asyncawait" class="slide level2">
+<h2><code>async</code>/<code>await</code></h2>
+<div class="sourceCode" id="cb41"><pre
+class="sourceCode js"><code class="sourceCode javascript"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> a <span class="op">=</span> <span class="cf">await</span> <span class="fu">runA</span>()</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> b <span class="op">=</span> <span class="cf">await</span> <span class="fu">runB</span>(a)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> c <span class="op">=</span> <span class="cf">await</span> <span class="fu">runC</span>(b)</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>…</span></code></pre></div>
+</section>
+<section id="evolution" class="slide level2">
+<h2>Evolution</h2>
+<div class="columns" style="gap: 0;">
+<div class="column">
+<div class="sourceCode" id="cb42"><pre
+class="sourceCode js small"><code class="sourceCode javascript"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runA</span>(<span class="kw">function</span> (a) {</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">runB</span>(a<span class="op">,</span> <span class="kw">function</span> (b) {</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">runC</span>(b<span class="op">,</span> <span class="kw">function</span> (c) {</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>      …</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+</div><div class="column">
+<div class="sourceCode" id="cb43"><pre
+class="sourceCode js small"><code class="sourceCode javascript"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runA</span>()</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(runB)</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(runC)</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(…)</span></code></pre></div>
+</div><div class="column">
+<div class="sourceCode" id="cb44"><pre
+class="sourceCode js small"><code class="sourceCode javascript"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> a <span class="op">=</span> <span class="cf">await</span> <span class="fu">runA</span>()</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> b <span class="op">=</span> <span class="cf">await</span> <span class="fu">runB</span>(a)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> c <span class="op">=</span> <span class="cf">await</span> <span class="fu">runC</span>(b)</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>…</span></code></pre></div>
+</div>
+</div>
+</section>
+<section id="previous-dataflow" class="slide level2">
+<h2>Previous dataflow</h2>
+<div class="sourceCode" id="cb45"><pre
+class="sourceCode hs"><code class="sourceCode haskell"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>    a        b        c</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="dt">A</span> ─────▶ <span class="dt">B</span> ─────▶ <span class="dt">C</span> ─────▶ …</span></code></pre></div>
+</section>
+<section id="alternate-dataflow" class="slide level2">
+<h2>Alternate dataflow</h2>
+<!-- TODO: Replace image -->
+<div class="sourceCode" id="cb46"><pre
+class="sourceCode hs"><code class="sourceCode haskell"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>    a        b        c</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="dt">A</span> ─────▶ <span class="dt">B</span> ─────▶ <span class="dt">C</span> ─────▶ …</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>│                 ▲</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>└─────────────────┘</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>         a</span></code></pre></div>
+</section>
+<section id="callbacks-and-asyncawait" class="slide level2">
+<h2>Callbacks and <code>async</code>/<code>await</code></h2>
+<div class="columns">
+<div class="column">
+<div class="sourceCode" id="cb47"><pre
+class="sourceCode js compact"><code class="sourceCode javascript"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runA</span>(<span class="kw">function</span> (a) {</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">runB</span>(a<span class="op">,</span> <span class="kw">function</span> (b) {</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">runC</span>(a<span class="op">,</span> b<span class="op">,</span> <span class="kw">function</span> (c) {</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>      …</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+</div><div class="column">
+<div class="sourceCode" id="cb48"><pre
+class="sourceCode js compact"><code class="sourceCode javascript"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> a <span class="op">=</span> <span class="cf">await</span> <span class="fu">runA</span>()</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> b <span class="op">=</span> <span class="cf">await</span> <span class="fu">runB</span>(a)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> c <span class="op">=</span> <span class="cf">await</span> <span class="fu">runC</span>(b)</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>…</span></code></pre></div>
+</div>
+</div>
+</section>
+<section id="promise-chaining-1" class="slide level2">
+<h2><code>Promise</code> chaining</h2>
+<div class="sourceCode" id="cb49"><pre
+class="sourceCode js"><code class="sourceCode javascript"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runA</span>()</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(runB)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(b <span class="kw">=&gt;</span> <span class="fu">runC</span>(<span class="op">??,</span> b)) <span class="co">// Missing `a`</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(…)</span></code></pre></div>
+</section>
+<section id="promise-chaining-2" class="slide level2">
+<h2><code>Promise</code> chaining</h2>
+<div class="sourceCode" id="cb50"><pre
+class="sourceCode js"><code class="sourceCode javascript"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runA</span>()</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(runB)</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(runC)</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(…)</span></code></pre></div>
+</section>
+<section id="promise-chaining-3" class="slide level2">
+<h2><code>Promise</code> chaining</h2>
+<div class="sourceCode" id="cb51"><pre
+class="sourceCode js"><code class="sourceCode javascript"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runA</span>()</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(a <span class="kw">=&gt;</span> [a<span class="op">,</span> <span class="fu">runB</span>()])</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(([a<span class="op">,</span> b]) <span class="kw">=&gt;</span> <span class="fu">runC</span>(a<span class="op">,</span> b))</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(…)</span></code></pre></div>
+</section>
+<section id="promise-chaining-4" class="slide level2">
+<h2><code>Promise</code> chaining</h2>
+<div class="sourceCode" id="cb52"><pre
+class="sourceCode js"><code class="sourceCode javascript"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runA</span>()</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Must return Promise&lt;…&gt;</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(a <span class="kw">=&gt;</span> [a<span class="op">,</span> <span class="fu">runB</span>()])</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(([a<span class="op">,</span> b]) <span class="kw">=&gt;</span> <span class="fu">runC</span>(a<span class="op">,</span> b))</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(…)</span></code></pre></div>
+</section>
+<section id="promise-chaining-5" class="slide level2">
+<h2><code>Promise</code> chaining</h2>
+<div class="sourceCode" id="cb53"><pre
+class="sourceCode js"><code class="sourceCode javascript"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runA</span>()</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Must return Promise&lt;…&gt;</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(a <span class="kw">=&gt;</span> <span class="bu">Promise</span><span class="op">.</span><span class="fu">all</span>([a<span class="op">,</span> <span class="fu">runB</span>()]))</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(([a<span class="op">,</span> b]) <span class="kw">=&gt;</span> <span class="fu">runC</span>(a<span class="op">,</span> b))</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(…)</span></code></pre></div>
+</section>
+<section id="add-an-extra-call-d" class="slide level2">
+<h2>Add an extra call <code>D</code></h2>
+<div class="sourceCode" id="cb54"><pre
+class="sourceCode hs"><code class="sourceCode haskell"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>             b</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>         ┌──────▶ <span class="dt">D</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>         │</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>    a    │   b        c</span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a><span class="dt">A</span> ─────▶ <span class="dt">B</span> ─────▶ <span class="dt">C</span> ─────▶ …</span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>│                 ▲</span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>└─────────────────┘</span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>         a</span></code></pre></div>
+</section>
+<section id="promise-chaining-6" class="slide level2">
+<h2><code>Promise</code> chaining</h2>
+<div class="sourceCode" id="cb55"><pre
+class="sourceCode js"><code class="sourceCode javascript"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runA</span>()</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(a <span class="kw">=&gt;</span> <span class="bu">Promise</span><span class="op">.</span><span class="fu">all</span>([a<span class="op">,</span> <span class="fu">runB</span>()]))</span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(([a<span class="op">,</span> b]) <span class="kw">=&gt;</span> <span class="bu">Promise</span><span class="op">.</span><span class="fu">all</span>(</span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>    [<span class="fu">runC</span>(a<span class="op">,</span> b)<span class="op">,</span> <span class="fu">runD</span>()]</span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">then</span>(([c<span class="op">,</span> _] <span class="kw">=&gt;</span> …)</span></code></pre></div>
+<div class="fragment">
+<p>(This is my <span class="math inline">\eta</span> villain origin
+story btw)</p>
+</div>
+</section>
+<section id="issues-with-promise-chaining" class="slide level2">
+<h2>Issues with <code>Promise</code>-chaining</h2>
+<ul>
+<li>Super fluent syntax for <strong>linear dataflow</strong></li>
+<li><strong>Immediately falls apart</strong> with the slightest
+branching
+<ul>
+<li>aka real world</li>
+</ul></li>
+<li><strong>Lost the ability to shadow</strong> from earlier
+callbacks</li>
+</ul>
+</section>
+<section id="nested-scopes" class="slide level2">
+<h2>Nested scopes</h2>
+<div class="columns">
+<div class="column">
+<div class="sourceCode" id="cb56"><pre
+class="sourceCode js compact"><code class="sourceCode javascript"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runA</span>(<span class="kw">function</span> (a) {</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">runB</span>(a<span class="op">,</span> <span class="kw">function</span> (b) {</span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">runC</span>(a<span class="op">,</span> b<span class="op">,</span> <span class="kw">function</span> (c) {</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>      …</span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+</div><div class="column">
+<div class="sourceCode" id="cb57"><pre
+class="sourceCode hs compact"><code class="sourceCode haskell"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="kw">do</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  a <span class="ot">&lt;-</span> runA</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  b <span class="ot">&lt;-</span> runB a</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>  c <span class="ot">&lt;-</span> runC a b</span></code></pre></div>
+</div>
+</div>
+</section>
+<section id="so-why-did-people-hate-callbacks" class="slide level2">
+<h2>So why did people hate callbacks?</h2>
+</section>
+<section id="indentation-closing-delimiters" class="slide level2">
+<h2>Indentation &amp; closing delimiters</h2>
+<div id="cb59" class="sourceCode">
+<pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runA</span>(<span class="kw">function</span> (a) {</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a><span class="span-code-highlight-indent">    </span><span class="fu">runB</span>(a<span class="op">,</span> <span class="kw">function</span> (b) {</span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a><span class="span-code-highlight-indent">        </span><span class="fu">runC</span>(a<span class="op">,</span> b<span class="op">,</span> <span class="kw">function</span> (c) {</span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a><span class="span-code-highlight-indent">            </span>…</span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a><span class="span-code-highlight-indent">        </span><span class="span-code-highlight">})</span></span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a><span class="span-code-highlight-indent">    </span><span class="span-code-highlight">})</span></span>
+<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a><span class="span-code-highlight">})</span></span></code></pre>
+</div>
+<div class="fragment">
+<div class="box">
+<p>This is all <strong>completely incidental</strong>, yet resulted in a
+<strong>loss of expressive fluency</strong> in async-handling
+constructs!</p>
+</div>
+</div>
+</section>
+<section id="concrete-vs.-abstract-syntax" class="slide level2">
+<h2>Concrete vs. abstract syntax</h2>
+<div class="columns">
+<div class="column">
+<div class="sourceCode" id="cb58"><pre
+class="sourceCode js compact"><code class="sourceCode javascript"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runA</span>(<span class="kw">function</span> (a) {</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">runB</span>(a<span class="op">,</span> <span class="kw">function</span> (b) {</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">runC</span>(a<span class="op">,</span> b<span class="op">,</span> <span class="kw">function</span> (c) {</span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>      …</span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+</div><div class="column">
+<div class="sourceCode" id="cb59"><pre
+class="sourceCode hs compact"><code class="sourceCode haskell"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="kw">do</span></span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>  a <span class="ot">&lt;-</span> runA</span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>  b <span class="ot">&lt;-</span> runB a</span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>  c <span class="ot">&lt;-</span> runC a b</span></code></pre></div>
+</div>
+</div>
+</section>
+<section id="moral-of-the-story" class="slide level2">
+<h2>Moral of the story</h2>
+<p>Languages can go through <strong>tremendous semantic changes</strong>
+based on <strong>completely incidental</strong> syntax</p>
+</section></section>
+<section>
+<section id="what-now" class="title-slide slide level1">
+<h1>What now?</h1>
+
+</section>
+<section id="problems-1" class="slide level2">
+<h2>Problems</h2>
+<p>Too often, concrete syntax decisionmaking is:</p>
+<ol type="1">
+<li><strong>Idiosyncratic</strong></li>
+<li><strong>Under-documented</strong></li>
+<li><strong>Under-researched</strong></li>
+</ol>
+<p><em>And that is a shame!</em></p>
+</section>
+<section id="first-steps" class="slide level2">
+<h2>First steps</h2>
+<ol type="1">
+<li><strong>Idiosyncratic</strong> → take these questions seriously (and
+rigorously)</li>
+<li><strong>Under-documented</strong> → document in
+archival/semi-archival media, including when decisions are
+unprincipled</li>
+<li><strong>Under-researched</strong> → we have tremendous opportunity
+to study these questions…more on this soon :)</li>
+</ol>
+</section>
+<section id="conclusions" class="slide level2">
+<h2>Conclusions</h2>
+<p>If we take seriously the idea of programming languages as user
+interfaces, then <strong>concrete syntax matters just as much as
+semantics</strong>.</p>
+<p>Concrete syntax shapes the way people understand semantics, and in
+turn <strong>shapes the semantics themselves</strong>.</p>
+</section>
+<section class="slide level2">
+
+<!--
+
+- Haskell used `:` for `cons` and `::` for type annotations because they thought Hindley–Milner type inference meant people wouldn't need to write stuff out.
+- Mathematica apply
+- Racket allows different paired delimiters
+- Our whole discipline doesn't care about names: alpha-equivalence
+    - x xs f g go
+- ReasonML
+
+-->
+</section></section>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Uses <code>any</code> for union types<a href="#/fnref1"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Paper by Castagna et al. 2023 uses <code>term</code>,
+but the documentation uses <code>any</code><a href="#/fnref2"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Uses module boundary system instead of creating a
+dynamic type<a href="#/fnref3" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Not truly <span class="math inline">\top</span>, but a
+type-erased existential box that requires casting or narrowing to use<a
+href="#/fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@^5.2.0/dist/reveal.js"></script>
+
+  <!-- reveal.js plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@^5.2.0/plugin/notes/notes.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@^5.2.0/plugin/search/search.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@^5.2.0/plugin/zoom/zoom.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+        // Display controls in the bottom right corner
+        controls: true,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: true,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'bottom-right',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: true,
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: false,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: true,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: true,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'fade',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1150,
+
+        height: 850,
+
+        // reveal.js plugins
+        plugins: [
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    </body>
+</html>

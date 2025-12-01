@@ -69,18 +69,34 @@ div.sourceCode {
     box-shadow: 0 0 0 1px var(--border-color);
 
     width: fit-content;
+    min-width: 200px;
     margin-inline: auto;
     padding-inline: var(--r-block-margin);
+    margin-block: 0.5em;
+}
+
+/* Left-align code blocks in list items. */
+li > div.sourceCode {
+    margin-inline: unset;
+}
+
+div.sourceCode:has(> .plain) {
+    background: none;
+    box-shadow: none;
 }
 
 .reveal pre {
     box-shadow: none;
-    font-size: 0.8em;
+    font-size: 1em;
     line-height: var(--code-line-height);
 }
 
-.reveal pre.large {
-    font-size: 1em;
+.reveal pre.compact {
+    font-size: 0.85em;
+}
+
+.reveal pre.small {
+    font-size: 0.65em;
 }
 
 .reveal pre.huge {
@@ -103,6 +119,11 @@ pre > code.sourceCode {
     white-space: pre-wrap; 
 }
 
+.reveal pre span.span-code-highlight,
+.reveal pre span.span-code-highlight-indent {
+    background: #ffd350c7;
+}
+
 /*********************************
  * Box
  *********************************/
@@ -112,6 +133,7 @@ pre > code.sourceCode {
     box-shadow: 0 0 0 3px var(--border-color);
     padding: 0.2em 0.8em;
     display: inline-block;
+    margin-block: 0.4em;
 }
 
 /*********************************
@@ -125,6 +147,9 @@ pre > code.sourceCode {
     border-left: 5px solid var(--border-color);
     padding-left: 0.8em;
     padding-block: 0;
+
+    /* Make it wider. */
+    width: 85%;
 }
 
 /* Get rid of the top margin on paragraphs, to align the blockquote left border. */
