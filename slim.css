@@ -110,6 +110,8 @@ pre > code.sourceCode {
 .reveal div.box {
     /* Replace the drop shadow with a border. */
     box-shadow: 0 0 0 3px var(--border-color);
+    padding: 0.2em 0.8em;
+    display: inline-block;
 }
 
 /*********************************
