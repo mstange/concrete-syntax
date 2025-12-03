@@ -67,6 +67,10 @@
 div.sourceCode {
     background-color: #fdfdfd;
     box-shadow: 0 0 0 1px var(--border-color);
+
+    width: fit-content;
+    margin-inline: auto;
+    padding-inline: var(--r-block-margin);
 }
 
 .reveal pre {
@@ -75,13 +79,23 @@ div.sourceCode {
     line-height: var(--code-line-height);
 }
 
+.reveal pre.large {
+    font-size: 1em;
+}
+
+.reveal pre.huge {
+    font-size: 2em;
+}
+
 pre > code.sourceCode > span {
     line-height: var(--code-line-height);
 }
 
 pre.sourceCode {
     /* For visual consistency with side margins. */
-    padding: 0.5em 0; 
+    padding: 0.5em 0.2em; 
+
+    width: fit-content;
 }
 
 pre > code.sourceCode {
