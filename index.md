@@ -652,7 +652,7 @@ becomes
     ```
 - Post-2015: **class-based inheritance**
 
-    ```js
+    ```js {.compact}
     class Parent {}
     class Child extends Parent {
       constructor() { super() }
@@ -670,7 +670,7 @@ becomes
 ::: columns
 ::: column
 **"Mystifies" functions** for visual efficiency
-```scheme
+```scheme {.compact}
 (define (fact n)
   (if (zero? n) 1
       (* n 
@@ -679,10 +679,12 @@ becomes
 :::
 ::: column
 **Redirects mental model** to classes
-```js
+```js {.compact}
 class Parent {}
 class Child extends Parent {
-  constructor() { super() }
+  constructor() { 
+    super() 
+  }
 }
 ```
 :::
