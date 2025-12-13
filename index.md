@@ -235,7 +235,7 @@ let n = 3 in
 ```
 ```js
 const n = 3;
-max(n, 3)
+max(n, 0)
 ```
 :::
 ::::::
@@ -246,7 +246,7 @@ max(n, 3)
 ::: {.column width="50%"}
 ```php
 my $n = 3;
-max($n, 3)
+max($n, 0)
 ```
 ```mathematica
 With[{n = 3},
@@ -269,7 +269,7 @@ max n 0
 ```
 ```js
 const n = 3;
-max(n, 3)
+max(n, 0)
 ```
 :::
 ::::::
@@ -393,7 +393,7 @@ Both important, but **metatextual**!
 ::: {.column width="50%"}
 ```php
 my $n = 3;
-max($n, 3)
+max($n, 0)
 ```
 ```mathematica
 With[{n = 3},
@@ -416,7 +416,7 @@ let n = 3 in
 ```
 ```js
 const n = 3;
-max(n, 3)
+max(n, 0)
 ```
 :::
 ::::::
