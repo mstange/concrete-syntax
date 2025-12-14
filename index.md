@@ -945,7 +945,7 @@ runA(function (a) {
 ```js {.compact}
 const a = await runA()
 const b = await runB(a)
-const c = await runC(b)
+const c = await runC(a, b)
 …
 ```
 :::
